@@ -1,5 +1,5 @@
-# Advent of Code 2020
-These are my solutions for the 2020 [Advent of Code](https://adventofcode.com).
+# Advent of Code 2021
+These are my solutions for the 2021 [Advent of Code](https://adventofcode.com).
 
 Don't expect this to be maintained, I might miss some days or even stop prematurely.
 
