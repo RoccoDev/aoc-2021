@@ -36,11 +36,10 @@ fn calc(input: &[u8], days: usize) -> usize {
         // Safe method
         // timers.rotate_left(1);
 
-        timers[timers.len() - 1] = 0; // Reset level 8 after shifting
         timers[6] += bearing;
-        timers[8] += bearing;
+        timers[8] = bearing;
     }
-    timers.into_iter().sum()
+    timers.iter().sum()
 }
 
 #[cfg(test)]
