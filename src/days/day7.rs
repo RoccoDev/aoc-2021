@@ -8,7 +8,7 @@ struct Crabs {
 #[aoc_generator(day7)]
 fn parse(input: &str) -> Crabs {
     let numbers: Vec<_> = input.split(',').map(|s| s.parse().unwrap()).sorted().collect();
-    let max = numbers.iter().max().map(|&i| i).unwrap();
+    let max = numbers.iter().max().copied().unwrap();
     Crabs {
         numbers,
         max

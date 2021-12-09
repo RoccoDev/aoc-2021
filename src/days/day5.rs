@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use fxhash::{FxHashMap, FxHashSet};
 use regex::Regex;
 
@@ -49,10 +51,8 @@ impl Line {
 
     /// Gets the list of points covered by this line to calculate an intersection - faster but requires more memory
     fn get_points(&self, no_diagonals: bool) -> Option<Vec<Point>> {
-        if no_diagonals {
-            if self.start.x != self.end.x && self.start.y != self.end.y {
-                return None;
-            }
+        if no_diagonals && self.start.x != self.end.x && self.start.y != self.end.y {
+            return None;
         }
 
         let mut points = Vec::with_capacity((self.dx + self.dy).abs() as usize);
@@ -103,7 +103,15 @@ impl From<((i32, i32), (i32, i32))> for Line {
         let dx = end.x - start.x;
         let dy = end.y - start.y;
 
-        let slope = (if dx == 0 { 0 } else if dx < 0 { -1 } else { 1 }, if dy == 0 { 0 } else if dy < 0 { -1 } else { 1 });
+        let slope = (match dx.cmp(&0) {
+            Ordering::Less => -1,
+            Ordering::Equal => 0,
+            Ordering::Greater => 1
+        }, match dy.cmp(&0) {
+            Ordering::Less => -1,
+            Ordering::Equal => 0,
+            Ordering::Greater => 1
+        });
 
         Line { start, end, slope, dx, dy, length_sq: len }
     }

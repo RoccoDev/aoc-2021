@@ -86,7 +86,7 @@ fn calc_spots(number_reprs: &mut [FxHashSet<char>], inputs: &[FxHashSet<char>]) 
 
     // 6 contains everything in top + (8 - 7)
     let diff_8_7 = diff(&number_reprs[8], &number_reprs[7]);
-    number_reprs[6] = inputs.iter().filter(|s| s.contains(&top) && s.is_superset(&diff_8_7)).next().cloned().unwrap();
+    number_reprs[6] = inputs.iter().find(|s| s.contains(&top) && s.is_superset(&diff_8_7)).cloned().unwrap();
 
     // top_right is 8 - 6
     let top_right = first_diff(&number_reprs[8], &number_reprs[6]);
@@ -94,29 +94,29 @@ fn calc_spots(number_reprs: &mut [FxHashSet<char>], inputs: &[FxHashSet<char>]) 
     let diff_8_4 = diff(&number_reprs[8], &number_reprs[4]);
     // From 8, remove 4, remove (3) and you should get only one number (which is bottom left)
     // Then you'd have either 5, 9, or 3, but 3 has top_right and has length 5
-    let (three, bottom_left) = inputs.iter().filter_map(|s| {
+    let (three, bottom_left) = inputs.iter().find_map(|s| {
         if s.len() != 5 /* filter out 9 */ || !s.contains(&top_right) /* filter out 5 */ {
             return None;
         }
-        let diff = diff_8_4.difference(&s).collect::<Vec<_>>();
+        let diff = diff_8_4.difference(s).collect::<Vec<_>>();
         (diff.len() == 1).then(|| (s.clone(), *diff[0]))
-    }).next().unwrap();
+    }).unwrap();
     number_reprs[3] = three;
     // The other is 5
-    number_reprs[5] = inputs.iter().filter(|&s| s.len() == 5 && !s.contains(&top_right)).next().cloned().unwrap();
-    // The other 5-length is 2
-    number_reprs[2] = inputs.iter().filter(|&s| s.len() == 5 && *s != number_reprs[3] && *s != number_reprs[5]).next().cloned().unwrap();
+    number_reprs[5] = inputs.iter().find(|&s| s.len() == 5 && !s.contains(&top_right)).cloned().unwrap();
+    // The other 5-length is find
+    number_reprs[2] = inputs.iter().find(|&s| s.len() == 5 && *s != number_reprs[3] && *s != number_reprs[5]).cloned().unwrap();
 
     // 6-length is either 6, 9, or 0
-    number_reprs[0] = inputs.iter().filter_map(|s| {
+    number_reprs[0] = inputs.iter().find_map(|s| {
         if s.len() != 6 {
             return None;
         }
         let diff = number_reprs[8].difference(s).collect::<Vec<_>>();
         (diff.len() == 1 && *diff[0] != bottom_left && *diff[0] != top_right).then(|| s.clone())
-    }).next().unwrap();
+    }).unwrap();
     // Other one is 9
-    number_reprs[9] = inputs.iter().filter(|&s| s.len() == 6 && *s != number_reprs[6] && *s != number_reprs[0]).next().cloned().unwrap();
+    number_reprs[9] = inputs.iter().find(|&s| s.len() == 6 && *s != number_reprs[6] && *s != number_reprs[0]).cloned().unwrap();
 }
 
 fn first_diff(s1: &FxHashSet<char>, s2: &FxHashSet<char>) -> char {
