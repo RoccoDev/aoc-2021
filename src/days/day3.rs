@@ -1,5 +1,3 @@
-use std::ops::Sub;
-
 struct Data {
     numbers: Vec<u32>,
     /// The length of each entry

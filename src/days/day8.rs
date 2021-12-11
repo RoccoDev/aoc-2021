@@ -1,8 +1,5 @@
-use std::collections::HashMap;
 use fxhash::{FxHashMap, FxHashSet};
 use itertools::Itertools;
-use regex::internal::Input;
-use regex::Regex;
 
 struct SegmentDisplay {
     patterns: Vec<FxHashSet<char>>,
@@ -21,7 +18,7 @@ impl Parser {
         for _ in 0..10 {
             numbers.push(Default::default());
         }
-        let mut inputs = display.patterns.iter().filter(|s| {
+        let inputs = display.patterns.iter().filter(|s| {
             let len = s.len();
             len != 2 && len != 4 && len != 3 && len != 7
         }).cloned().collect();
@@ -121,14 +118,6 @@ fn calc_spots(number_reprs: &mut [FxHashSet<char>], inputs: &[FxHashSet<char>]) 
 
 fn first_diff(s1: &FxHashSet<char>, s2: &FxHashSet<char>) -> char {
     *s1.difference(s2).next().unwrap()
-}
-
-fn first_inter(s1: &FxHashSet<char>, s2: &FxHashSet<char>) -> char {
-    *s1.intersection(s2).next().unwrap()
-}
-
-fn inter(s1: &FxHashSet<char>, s2: &FxHashSet<char>) -> FxHashSet<char> {
-    s1.intersection(s2).copied().collect()
 }
 
 fn diff(s1: &FxHashSet<char>, s2: &FxHashSet<char>) -> FxHashSet<char> {

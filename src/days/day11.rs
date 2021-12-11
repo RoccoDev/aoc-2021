@@ -1,8 +1,5 @@
 use std::cell::Cell;
-use std::collections::HashSet;
-use std::marker::PhantomData;
 use fxhash::{FxBuildHasher, FxHashSet};
-use itertools::Itertools;
 
 #[derive(Clone)]
 struct Grid {
@@ -50,7 +47,6 @@ fn parse(input: &str) -> Grid {
 
 #[aoc(day11, part1)]
 fn part1(input: &Grid) -> usize {
-    let mut input = input.clone();
     let mut flashes = 0;
     for _ in 0..100 {
         for octopus in &input.inner {
@@ -58,7 +54,7 @@ fn part1(input: &Grid) -> usize {
         }
         let mut flashed = FxHashSet::with_capacity_and_hasher(input.inner.len(), FxBuildHasher::default());
         for (i, _) in input.inner.iter().enumerate().filter(|(_, v)| v.get() > 9) {
-            flash(i,&input, &mut flashed);
+            flash(i, input, &mut flashed);
         }
         for pos in &flashed {
             input.inner[*pos].set(0);
@@ -70,7 +66,6 @@ fn part1(input: &Grid) -> usize {
 
 #[aoc(day11, part2)]
 fn part2(input: &Grid) -> usize {
-    let mut input = input.clone();
     let mut i = 1;
     loop {
         for octopus in &input.inner {
@@ -78,7 +73,7 @@ fn part2(input: &Grid) -> usize {
         }
         let mut flashed = FxHashSet::with_capacity_and_hasher(input.inner.len(), FxBuildHasher::default());
         for (i, _) in input.inner.iter().enumerate().filter(|(_, v)| v.get() > 9) {
-            flash(i,&input, &mut flashed);
+            flash(i, input, &mut flashed);
         }
         for pos in &flashed {
             input.inner[*pos].set(0);
