@@ -1,5 +1,5 @@
-use std::cell::Cell;
 use fxhash::{FxBuildHasher, FxHashSet};
+use std::cell::Cell;
 
 #[derive(Clone)]
 struct Grid {
@@ -11,7 +11,11 @@ impl Grid {
     pub fn from(raw: Vec<Vec<u8>>) -> Self {
         Grid {
             line_len: raw[0].len() as isize,
-            inner: raw.into_iter().flat_map(|v| v.into_iter()).map(Cell::new).collect(),
+            inner: raw
+                .into_iter()
+                .flat_map(|v| v.into_iter())
+                .map(Cell::new)
+                .collect(),
         }
     }
 
@@ -42,7 +46,12 @@ impl Grid {
 
 #[aoc_generator(day11)]
 fn parse(input: &str) -> Grid {
-    Grid::from(input.lines().map(|s| s.chars().map(|c| c.to_digit(10).unwrap() as u8).collect()).collect())
+    Grid::from(
+        input
+            .lines()
+            .map(|s| s.chars().map(|c| c.to_digit(10).unwrap() as u8).collect())
+            .collect(),
+    )
 }
 
 #[aoc(day11, part1)]
@@ -52,7 +61,8 @@ fn part1(input: &Grid) -> usize {
         for octopus in &input.inner {
             octopus.set(octopus.get() + 1);
         }
-        let mut flashed = FxHashSet::with_capacity_and_hasher(input.inner.len(), FxBuildHasher::default());
+        let mut flashed =
+            FxHashSet::with_capacity_and_hasher(input.inner.len(), FxBuildHasher::default());
         for (i, _) in input.inner.iter().enumerate().filter(|(_, v)| v.get() > 9) {
             flash(i, input, &mut flashed);
         }
@@ -71,7 +81,8 @@ fn part2(input: &Grid) -> usize {
         for octopus in &input.inner {
             octopus.set(octopus.get() + 1);
         }
-        let mut flashed = FxHashSet::with_capacity_and_hasher(input.inner.len(), FxBuildHasher::default());
+        let mut flashed =
+            FxHashSet::with_capacity_and_hasher(input.inner.len(), FxBuildHasher::default());
         for (i, _) in input.inner.iter().enumerate().filter(|(_, v)| v.get() > 9) {
             flash(i, input, &mut flashed);
         }
