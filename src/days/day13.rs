@@ -51,17 +51,29 @@ impl Grid {
     }
 
     fn fold_left(&mut self, x: usize) {
-        for i in (0..self.inner.len())
+        for mut i in &(0..self.inner.len())
             .filter(|i| i % self.line_len >= x)
-            .rev() {
-            let val = self.inner.remove(i);
-            let col = i % self.line_len;
-            let row_0 = i - col;
-            let index = row_0 + self.line_len - 1 - col;
-            if index == self.inner.len() {
-                continue;
+            .rev().chunks(x + 1) {
+            let first = i.next().unwrap();
+            let last = i.last().unwrap();
+
+            let mut to_update = Vec::with_capacity(x + 1);
+            for (old_index, val) in self.inner.drain(last..=first).enumerate() {
+                let index = last + old_index;
+                let col = index % self.line_len;
+                let row_0 = index - col;
+                let index = row_0 + self.line_len - 1 - col;
+
+                to_update.push((index, val));
+                index_offset += 1;
             }
-            self.inner[index] = self.inner[index] || val;
+
+            for (index, val) in to_update {
+                if index == self.inner.len() {
+                   continue;
+                }
+                self.inner[index] = self.inner[index] || val;
+            }
         }
         self.line_len -= x + 1;
     }
@@ -74,7 +86,7 @@ impl Grid {
                 if ind >= self.inner.len() {
                     return;
                 }
-                print!("{}", if self.inner[ind] {'#'} else {'.'});
+                print!("{}", if self.inner[ind] {'#'} else {' '});
             }
             println!();
             index += self.line_len;
