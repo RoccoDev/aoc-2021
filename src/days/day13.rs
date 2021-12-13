@@ -65,7 +65,6 @@ impl Grid {
                 let index = row_0 + self.line_len - 1 - col;
 
                 to_update.push((index, val));
-                index_offset += 1;
             }
 
             for (index, val) in to_update {
@@ -78,19 +77,10 @@ impl Grid {
         self.line_len -= x + 1;
     }
 
-    fn print(&self) {
-        let mut index = 0;
-        loop {
-            for x in 0..self.line_len {
-                let ind = index + x;
-                if ind >= self.inner.len() {
-                    return;
-                }
-                print!("{}", if self.inner[ind] {'#'} else {' '});
-            }
-            println!();
-            index += self.line_len;
-        }
+    fn print(&self) -> String {
+       format!("\n{}", self.inner.chunks(self.line_len)
+           .map(|c| c.iter().map(|b| if *b {'#'} else {' '}).join(""))
+           .join("\n"))
     }
 }
 
@@ -117,13 +107,12 @@ fn part1(input: &Paper) -> usize {
 }
 
 #[aoc(day13, part2)]
-fn part2(input: &Paper) -> usize {
+fn part2(input: &Paper) -> String {
     let mut paper = input.clone();
     for fold in &paper.folds {
         paper.grid.fold(fold);
     }
-    paper.grid.print();
-    0
+    paper.grid.print()
 }
 
 #[cfg(test)]
