@@ -1,3 +1,4 @@
+use fxhash::FxHashSet;
 use itertools::Itertools;
 
 #[derive(Clone)]
@@ -14,23 +15,13 @@ enum Fold {
 
 #[derive(Clone)]
 struct Grid {
-    inner: Vec<bool>,
-    line_len: usize
+    inner: Vec<(usize, usize)>,
 }
 
 impl Grid {
     fn parse(points: &[(usize, usize)]) -> Self {
-        let line_len = points.iter().map(|(x, _)| x).copied().max().unwrap() as usize + 1;
-        let max_y = points.iter().map(|(_, y)| y).copied().max().unwrap() as usize;
-        let mut grid = vec![false; line_len * (max_y + 1)];
-
-        for point in points {
-            grid[point.1 * line_len + point.0] = true;
-        }
-
         Grid {
-            inner: grid,
-            line_len
+            inner: points.into_iter().copied().collect()
         }
     }
 
@@ -41,46 +32,40 @@ impl Grid {
         }
     }
 
-    fn fold_up(&mut self, y: usize) {
-        let y_start = y * self.line_len;
-        let removed = self.inner.split_off(y_start);
-        for (i, val) in removed.into_iter().skip(self.line_len).enumerate() {
-            let index = (i % self.line_len) + self.line_len * (y - 1 - (i / self.line_len));
-            self.inner[index] = self.inner[index] || val;
+    fn fold_up(&mut self, fold_y: usize) {
+        for (_, y) in &mut self.inner {
+            if *y > fold_y {
+                *y = fold_y - (*y - fold_y);
+            }
         }
     }
 
-    fn fold_left(&mut self, x: usize) {
-        for mut i in &(0..self.inner.len())
-            .filter(|i| i % self.line_len >= x)
-            .rev().chunks(x + 1) {
-            let first = i.next().unwrap();
-            let last = i.last().unwrap();
-
-            let mut to_update = Vec::with_capacity(x + 1);
-            for (old_index, val) in self.inner.drain(last..=first).enumerate() {
-                let index = last + old_index;
-                let col = index % self.line_len;
-                let row_0 = index - col;
-                let index = row_0 + self.line_len - 1 - col;
-
-                to_update.push((index, val));
-            }
-
-            for (index, val) in to_update {
-                if index == self.inner.len() {
-                   continue;
-                }
-                self.inner[index] = self.inner[index] || val;
+    fn fold_left(&mut self, fold_x: usize) {
+        for (x, _) in &mut self.inner {
+            if *x > fold_x {
+                *x = fold_x - (*x - fold_x);
             }
         }
-        self.line_len -= x + 1;
     }
 
-    fn print(&self) -> String {
-       format!("\n{}", self.inner.chunks(self.line_len)
-           .map(|c| c.iter().map(|b| if *b {'#'} else {' '}).join(""))
-           .join("\n"))
+    fn sort(&mut self) {
+        self.inner.sort();
+        self.inner.dedup();
+    }
+
+    fn print(self) -> String {
+        let max_x = self.inner.iter().map(|(x, _)| x).copied().max().unwrap();
+        let max_y = self.inner.iter().map(|(_, y)| y).copied().max().unwrap();
+        let set: FxHashSet<_> = self.inner.into_iter().collect();
+        let mut buf = String::with_capacity(1 + (max_x + 1) * (max_y + 1) + max_y + 1);
+        buf += "\n";
+        for y in 0..=max_y {
+            for x in 0..=max_x {
+                buf += if set.contains(&(x, y)) {"#"} else {" "};
+            }
+            buf += "\n";
+        }
+        buf
     }
 }
 
@@ -103,7 +88,8 @@ fn parse(input: &str) -> Paper {
 fn part1(input: &Paper) -> usize {
     let mut paper = input.clone();
     paper.grid.fold(&input.folds[0]);
-    paper.grid.inner.into_iter().filter(|&b| b).count()
+    paper.grid.sort();
+    paper.grid.inner.len()
 }
 
 #[aoc(day13, part2)]
@@ -112,6 +98,7 @@ fn part2(input: &Paper) -> String {
     for fold in &paper.folds {
         paper.grid.fold(fold);
     }
+    paper.grid.sort();
     paper.grid.print()
 }
 
