@@ -21,7 +21,7 @@ struct Grid {
 impl Grid {
     fn parse(points: &[(usize, usize)]) -> Self {
         Grid {
-            inner: points.into_iter().copied().collect()
+            inner: points.iter().copied().collect()
         }
     }
 
@@ -49,7 +49,7 @@ impl Grid {
     }
 
     fn sort(&mut self) {
-        self.inner.sort();
+        self.inner.sort_unstable();
         self.inner.dedup();
     }
 

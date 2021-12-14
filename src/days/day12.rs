@@ -6,11 +6,11 @@ fn parse(input: &str) -> FxHashMap<i64, FxHashSet<i64>> {
     let mut map = FxHashMap::default();
     for line in input.lines() {
         let (start, end) = line.split('-').map(get_cave_id).collect_tuple().unwrap();
-        map.entry(start).or_insert_with(|| FxHashSet::default()).insert(end);
+        map.entry(start).or_insert_with(FxHashSet::default).insert(end);
     }
     for (k, v) in map.clone().into_iter() {
         for cave in &v {
-            map.entry(*cave).or_insert_with(|| FxHashSet::default()).insert(k);
+            map.entry(*cave).or_insert_with(FxHashSet::default).insert(k);
         }
     }
     map
