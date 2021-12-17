@@ -95,9 +95,10 @@ fn read_packet(input: &mut &str) -> Packet {
                     if a == '0' {
                         found = true;
                     }
-                    Some(format!("{}{}{}{}", b, c, d, e))
+                    Some([b, c, d, e])
                 })
                 .fuse()
+                .flatten()
                 .join("");
             *input = &input[(num.len() + (num.len() / 4) as usize)..];
             let num = usize::from_str_radix(&num, 2).unwrap();
