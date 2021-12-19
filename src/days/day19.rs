@@ -1,8 +1,6 @@
 use std::ops::{Add, Sub};
-use fxhash::{FxHashMap, FxHashSet};
+use fxhash::{FxBuildHasher, FxHashMap, FxHashSet};
 use itertools::Itertools;
-
-// Could be optimized
 
 #[derive(Clone, Debug)]
 struct Scanner {
@@ -106,8 +104,12 @@ impl <'a> Sub for &'a Scanner {
 
     fn sub(self, rhs: Self) -> Self::Output {
         for i in 0..24 {
-            let counts = self.beacons.iter().copied().map(|p| p.rotate(i))
-                .cartesian_product(rhs.beacons.iter().copied()).map(|(pos1, pos2)| pos2 - pos1).counts();
+            // FxHashMap here (instead of std counts) gives a 80% performance increase
+            let mut counts: FxHashMap<Pos, usize> = FxHashMap::with_capacity_and_hasher(self.beacons.len() * rhs.beacons.len(), FxBuildHasher::default());
+            self.beacons.iter().copied().map(|p| p.rotate(i))
+                .cartesian_product(rhs.beacons.iter().copied()).map(|(pos1, pos2)| pos2 - pos1).for_each(|i| {
+                *counts.entry(i).or_default() += 1
+            });
             for (k, v) in counts {
                 if v >= 12 {
                     return Some((k, i));

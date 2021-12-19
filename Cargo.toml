@@ -13,3 +13,7 @@ strum = { version = "0.22", features = ["derive"] }
 fxhash = "0.2.1"
 itertools = "0.10"
 pathfinding = "3"
+
+[profile.release]
+lto = true
+codegen-units = 1
