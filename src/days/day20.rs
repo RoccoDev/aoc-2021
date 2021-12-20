@@ -1,5 +1,6 @@
 use fxhash::FxHashSet;
 use itertools::Itertools;
+use rayon::prelude::*;
 
 #[derive(Clone, Debug)]
 struct Image {
@@ -23,23 +24,23 @@ impl Image {
 
     #[inline(always)]
     fn flip(&mut self) {
-        let mut output = FxHashSet::default();
-
-        for x in (self.min_x - 2)..(self.max_x + 2) {
-            for y in (self.min_y - 2)..(self.max_y + 2) {
+        let permutations =  ((self.min_x - 2)..(self.max_x + 2)).cartesian_product((self.min_y - 2)..(self.max_y + 2)).collect_vec();
+        self.input = permutations
+            .par_iter()
+            .filter_map(|(x, y)| {
                 let mut bits = 0usize;
                 (-1..=1).cartesian_product(-1..=1).enumerate().map(|(i, (dy, dx))| (i, self.get_color((x + dx, y + dy))))
                     .filter(|(_, b)| *b).for_each(|(bit, _)| {
                     bits |= 1 << (8 - bit);
                 });
                 if self.model[bits] {
-                    output.insert((x, y));
+                    Some((*x, *y))
+                } else {
+                    None
                 }
-            }
-        }
+            }).collect();
 
         self.infinite_color = self.model[if self.infinite_color { self.model.len() - 1 } else { 0 }];
-        self.input = output;
 
         let (min_x, max_x) = self.input.iter().map(|&(x, _)| x).minmax().into_option().unwrap();
         let (min_y, max_y) = self.input.iter().map(|&(_, y)| y).minmax().into_option().unwrap();
