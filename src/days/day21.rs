@@ -1,4 +1,4 @@
-use fxhash::FxHashMap;
+use fxhash::{FxBuildHasher, FxHashMap};
 use itertools::Itertools;
 
 #[derive(Eq, PartialEq, Hash, Clone, Copy)]
@@ -6,20 +6,6 @@ struct GameState {
     // current, opponent
     pos: (usize, usize),
     score: (usize, usize),
-}
-
-impl Die {
-    pub fn generate_tuple(&mut self, max: u8) -> (u8, u8, u8) {
-        (0..3).map(|_| self.gen(max)).collect_tuple().unwrap()
-    }
-
-    fn gen(&mut self, max: u8) -> u8 {
-        self.0 += 1;
-        if self.0 > max {
-            self.0 = 1;
-        }
-        self.0
-    }
 }
 
 #[aoc_generator(day21)]
@@ -57,8 +43,8 @@ fn part2(input: &[usize]) -> usize {
     let positions = [input[0], input[1]];
     let scores = [0, 0];
 
-    // Stores win data for known paths
-    let mut cache: FxHashMap<GameState, [usize; 2]> = FxHashMap::default();
+    // Stores win data for known paths, size was ~16k in my case
+    let mut cache: FxHashMap<GameState, [usize; 2]> = FxHashMap::with_capacity_and_hasher(20_000, FxBuildHasher::default());
 
     let winners = run_game(scores, positions, &mut cache);
     *winners.iter().max().unwrap()
