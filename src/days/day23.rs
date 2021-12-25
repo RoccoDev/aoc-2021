@@ -1,10 +1,10 @@
 use itertools::Itertools;
-use arrayvec::ArrayVec;
 use pathfinding::prelude::dijkstra;
 
-fn calc_moves(grid: &ArrayVec<ArrayVec<u8, 32>, 32>) -> ArrayVec<(ArrayVec<ArrayVec<u8, 32>, 32>, usize), 32> {
+#[allow(clippy::ptr_arg)]
+fn calc_moves(grid: &Vec<Vec<u8>>) -> Vec<(Vec<Vec<u8>>, usize)> {
     let room_y_len = grid.len() - 2;
-    let mut moves = ArrayVec::new();
+    let mut moves = Vec::with_capacity(25);
     let hallway = &grid[1];
     for x in 0..hallway.len() {
         let (destination_x, cost) = match hallway[x] {
@@ -30,7 +30,7 @@ fn calc_moves(grid: &ArrayVec<ArrayVec<u8, 32>, 32>) -> ArrayVec<(ArrayVec<Array
             // We can't move into rooms that are either full or occupied by at least a different amphipod
             continue;
         }
-        let mut next_grid = grid.clone();
+        let mut next_grid = grid.to_owned();
         next_grid[destination_y][destination_x] = hallway[x];
         next_grid[1][x] = b'.';
         moves.push((next_grid, (r1 - r0 + destination_y - 1) * cost));
@@ -46,10 +46,10 @@ fn calc_moves(grid: &ArrayVec<ArrayVec<u8, 32>, 32>) -> ArrayVec<(ArrayVec<Array
         if (2..y).any(|i| grid[i][x] != b'.') || (y + 1..=room_y_len).any(|i| grid[i][x] == b'.') {
             continue;
         }
-        for i in x..hallway.len() {
-            if hallway[i] != b'.' { break; }
+        for (i, space) in hallway.iter().enumerate().skip(x) {
+            if *space != b'.' { break; }
             if ![1, 2, 4, 6, 8, 10, 11].contains(&i) { continue; }
-            let mut next_grid = grid.clone();
+            let mut next_grid = grid.to_owned();
             next_grid[1][i] = grid[y][x];
             next_grid[y][x] = b'.';
             moves.push((next_grid, (y - 1 + i - x) * cost));
@@ -57,7 +57,7 @@ fn calc_moves(grid: &ArrayVec<ArrayVec<u8, 32>, 32>) -> ArrayVec<(ArrayVec<Array
         for i in (1..=x).rev() {
             if hallway[i] != b'.' { break; }
             if ![1, 2, 4, 6, 8, 10, 11].contains(&i) { continue; }
-            let mut next_grid = grid.clone();
+            let mut next_grid = grid.to_owned();
             next_grid[1][i] = grid[y][x];
             next_grid[y][x] = b'.';
             moves.push((next_grid, (y - 1 + x - i) * cost));
@@ -66,7 +66,8 @@ fn calc_moves(grid: &ArrayVec<ArrayVec<u8, 32>, 32>) -> ArrayVec<(ArrayVec<Array
     moves
 }
 
-fn find_path(maze: &ArrayVec<ArrayVec<u8, 32>, 32>) -> usize {
+#[allow(clippy::ptr_arg)]
+fn find_path(maze: &Vec<Vec<u8>>) -> usize {
     dijkstra(maze,
              calc_moves,
              |m| {
@@ -75,18 +76,20 @@ fn find_path(maze: &ArrayVec<ArrayVec<u8, 32>, 32>) -> usize {
 }
 
 #[aoc_generator(day23)]
-fn parse(input: &str) -> ArrayVec<ArrayVec<u8, 32>, 32> {
+fn parse(input: &str) -> Vec<Vec<u8>> {
     input.lines().map(|l| l.bytes().collect()).collect()
 }
 
 #[aoc(day23, part1)]
-fn part1(input: &ArrayVec<ArrayVec<u8, 32>, 32>) -> usize {
+#[allow(clippy::ptr_arg)]
+fn part1(input: &Vec<Vec<u8>>) -> usize {
     find_path(input)
 }
 
 #[aoc(day23, part2)]
-fn part2(input: &ArrayVec<ArrayVec<u8, 32>, 32>) -> usize {
-    let mut input = input.clone();
+#[allow(clippy::ptr_arg)]
+fn part2(input: &[Vec<u8>]) -> usize {
+    let mut input = input.to_owned();
     input.insert(3, "  #D#B#A#C#".bytes().collect());
     input.insert(3, "  #D#C#B#A#".bytes().collect());
     find_path(&input)

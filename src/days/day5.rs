@@ -16,12 +16,12 @@ struct Line {
     dx: i32,
     dy: i32,
     slope: (i32, i32),
-    length_sq: i32
+    _length_sq: i32
 }
 
 impl Line {
     /// Uses vectors to calculate whether the line points and the given points are colinear - slower but low memory footprint
-    fn vector_intersection(&self, line: &Line, full: bool, intersections: &mut FxHashSet<Point>) {
+    fn _vector_intersection(&self, line: &Line, full: bool, intersections: &mut FxHashSet<Point>) {
         if std::ptr::eq(line, self) {
             return;
         }
@@ -38,7 +38,7 @@ impl Line {
         let mut point = Point { x: line.start.x, y: line.start.y };
 
         loop {
-            if self.contains_vectored(&point) {
+            if self._contains_vectored(&point) {
                 intersections.insert(point);
             }
             if point.x == line.end.x && point.y == line.end.y {
@@ -70,7 +70,7 @@ impl Line {
         Some(points)
     }
 
-    fn contains_vectored(&self, point: &Point) -> bool {
+    fn _contains_vectored(&self, point: &Point) -> bool {
         let point = *point;
         if (point == self.start) || (point == self.end) {
             return true;
@@ -83,7 +83,7 @@ impl Line {
         if dot_product < 0 {
             return false;
         }
-        dot_product <= self.length_sq
+        dot_product <= self._length_sq
     }
 }
 
@@ -113,7 +113,7 @@ impl From<((i32, i32), (i32, i32))> for Line {
             Ordering::Greater => 1
         });
 
-        Line { start, end, slope, dx, dy, length_sq: len }
+        Line { start, end, slope, dx, dy, _length_sq: len }
     }
 }
 
@@ -127,6 +127,7 @@ fn parse(input: &str) -> Vec<Line> {
     }).collect()
 }
 
+/*
 #[aoc(day5, part1, vectors)]
 fn part1_vectors(input: &[Line]) -> usize {
     let mut intersections = FxHashSet::default();
@@ -137,6 +138,7 @@ fn part1_vectors(input: &[Line]) -> usize {
     }
     intersections.len()
 }
+*/
 
 #[aoc(day5, part1, points)]
 fn part1_points(input: &[Line]) -> usize {
@@ -160,6 +162,7 @@ fn part2_points(input: &[Line]) -> usize {
     intersections.into_iter().filter(|(_, v)| *v > 1).count()
 }
 
+/*
 #[aoc(day5, part2, vectors)]
 fn part2_vectors(input: &[Line]) -> usize {
     let mut intersections = FxHashSet::default();
@@ -170,6 +173,7 @@ fn part2_vectors(input: &[Line]) -> usize {
     }
     intersections.len()
 }
+*/
 
 #[cfg(test)]
 mod tests {
