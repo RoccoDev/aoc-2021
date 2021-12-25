@@ -68,7 +68,7 @@ fn calc_moves(grid: &ArrayVec<ArrayVec<u8, 32>, 32>) -> ArrayVec<(ArrayVec<Array
 
 fn find_path(maze: &ArrayVec<ArrayVec<u8, 32>, 32>) -> usize {
     dijkstra(maze,
-             |m| calc_moves(m),
+             calc_moves,
              |m| {
                  m[2..=(m.len() - 2)].iter().all(|l| itertools::equal(l[3..=9].iter().copied(), "A#B#C#D".bytes()))
              }).unwrap().1

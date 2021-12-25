@@ -63,13 +63,13 @@ fn parse(input: &str) -> Program {
         }
     }).collect_vec();
     let subroutines = instructions.split(|&i| i == Instruction::Input).map(|i| Subroutine {
-        instructions: i.into_iter().copied().collect_vec()
+        instructions: i.iter().copied().collect_vec()
     }).collect_vec();
     Program {subroutines}
 }
 
 #[aoc(day24, part1)]
-fn part1(input: &Program) -> String {
+fn part1(input: &Program) -> usize {
     let mut res = [0; 14];
     let mut buf: VecDeque<(isize, isize)> = VecDeque::new();
     for (i, sub) in input.subroutines.iter().skip(1).enumerate() {
@@ -95,11 +95,11 @@ fn part1(input: &Program) -> String {
             buf.push_front((i as isize, last_y_pos as isize));
         }
     }
-    res.into_iter().join("")
+    res.into_iter().fold(0usize, |acc, x| acc * 10 + x as usize)
 }
 
 #[aoc(day24, part2)]
-fn part2(input: &Program) -> String {
+fn part2(input: &Program) -> usize {
     let mut res = [0; 14];
     let mut buf: VecDeque<(isize, isize)> = VecDeque::new();
     for (i, sub) in input.subroutines.iter().skip(1).enumerate() {
@@ -125,5 +125,5 @@ fn part2(input: &Program) -> String {
             buf.push_front((i as isize, last_y_pos as isize));
         }
     }
-    res.into_iter().join("")
+    res.into_iter().fold(0usize, |acc, x| acc * 10 + x as usize)
 }
